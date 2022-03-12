@@ -89,3 +89,101 @@ void resetAnsi(int x);
 void pushTerm();
 int resetTerm();
 void cls();
+
+//USER INTERFACE
+void writeStr(int wherex, int wherey, char *str, int backcolor, int forecolor);
+char textbox(int wherex, int wherey, int displayLength,char label[MAX_TEXTBOX], char text[MAX_TEXTBOX], int backcolor,
+	    int labelcolor, int textcolor);
+void writeCh(int wherex, int wherey, wchar_t  ch, int backcolor, int forecolor);
+int writeNum(int x, int y, int num, char backcolor, char forecolor);
+void window(int x1, int y1, int x2, int y2, int backcolor,
+         int bordercolor, int titlecolor, int border, int title);
+void toUpper(char *text);
+
+void newGame();
+void gameLoop();
+void displayHelp();
+void drawBoard();
+void credits();
+int checkGreen(char c, int index, char *str);
+int checkOrange(char c, int index, char *str);
+void checkRepeatedLetters();
+void writeWord(int index,  char text[MAX_TEXTBOX]);
+void cleanArea();
+int findIndex(char c);
+
+int openFile(FILE ** fileHandler, char *fileName, char *mode);
+long countWords(FILE * fileHandler);
+void getWordfromDictionary(FILE * fileHandler, char WORD[MAX_TEXTBOX]);
+int isWordinDictionary(FILE * fileHandler, char WORD[MAX_TEXTBOX]);
+int closeFile(FILE * fileHandler);
+
+void pushTerm() {
+    tcgetattr(0, &failsafe);
+}
+
+int resetTerm() {
+  if (tcsetattr(0, TCSAFLUSH, &failsafe) < 0) return -1;
+  return 0;
+}
+
+int getTerminalDimensions(int *rows, int *columns) {
+  ioctl(0, TIOCGWINSZ, &max);
+  *columns = max.ws_col;
+  *rows = max.ws_row;
+  return 0;
+}
+
+void hidecursor() {
+  printf("\e[?25l");
+}
+
+void showcursor() {
+  printf("\e[?25h");
+}
+
+void cls() {
+  system("clear");
+}
+
+
+int getPos(int *y, int *x) {
+
+ char buf[30]={0};
+ int ret, i, pow;
+ char ch;
+
+*y = 0; *x = 0;
+
+ struct termios term, restore;
+
+ tcgetattr(0, &term);
+ tcgetattr(0, &restore);
+ term.c_lflag &= ~(ICANON|ECHO);
+ tcsetattr(0, TCSANOW, &term);
+
+ write(1, "\033[6n", 4);
+
+ for(i = 0, ch = 0; ch != 'R'; i++) {
+    ret = read(0, &ch, 1);
+    if (!ret) {
+       tcsetattr(0, TCSANOW, &restore);
+       return 1;
+    }
+    buf[i] = ch;
+ }
+
+ if (i < 2) {
+    tcsetattr(0, TCSANOW, &restore);
+    return(1);
+ }
+
+ for(i -= 2, pow = 1; buf[i] != ';'; i--, pow *= 10)
+     *x = *x + ( buf[i] - '0' ) * pow;
+
+ for(i-- , pow = 1; buf[i] != '['; i--, pow *= 10)
+     *y = *y + ( buf[i] - '0' ) * pow;
+
+ tcsetattr(0, TCSANOW, &restore);
+ return 0;
+}
