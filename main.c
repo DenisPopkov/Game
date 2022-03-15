@@ -187,3 +187,53 @@ int getPos(int *y, int *x) {
  tcsetattr(0, TCSANOW, &restore);
  return 0;
 }
+
+int main(){
+   srand((unsigned) time(&t));
+   //INIT TERMINAL
+   getPos(&wherey,&wherex);
+   oldx = wherex;
+   oldy = wherey;
+   getTerminalDimensions(&rows, &columns);
+   if (rows < BOARDSIZEY || columns < BOARDSIZEX) {
+      printf("Error: Terminal size is too small. Resize terminal. \n");
+      exit(0);
+   }
+   if (rows-wherey < BOARDSIZEY) {
+      cls();
+      getPos(&wherey,&wherex);
+      oldx = wherex;
+     oldy = wherey;
+   }
+   //SEARCH FOR DICTIONARY
+   okFile = openFile(&fileSource, DICTIONARY, "r");
+   okFile2 = openFile(&fileSource2, POSSIBLES, "r");
+   if (okFile == 0 || okFile2 == 0) {
+     //No dictionary
+     dictionaryPresent = 0;
+     words = 1;
+     strcpy(secretWord, testWord);
+     printf("ERROR: Dictionary file(s) is missing.\n");
+     exit(0);
+   } else {
+     //Dictionary is present
+     dictionaryPresent = 1;
+     words = countWords(fileSource);
+     words2 = countWords(fileSource2);
+     //Selecting a random word from dictionary
+     randomWord = rand() % words2;
+     getWordfromDictionary(fileSource2, secretWord);
+     pushTerm();
+     hidecursor();
+     resetch();
+     //Set Locale For Unicode characters to work
+     setlocale(LC_ALL, "");
+     //GAME
+     newGame();
+     if (fileSource != NULL) closeFile(fileSource);
+     if (fileSource2 != NULL) closeFile(fileSource2);
+     credits();
+   }
+   
+  return 0;
+}
