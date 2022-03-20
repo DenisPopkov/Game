@@ -1,0 +1,4 @@
+#ifndef _CONFIGURATION_HEADER_GUARD_H_
+#define _CONFIGURATION_HEADER_GUARD_H_
+#cmakedefine DATA_DIR "@DATA_DIR@"
+#endif
