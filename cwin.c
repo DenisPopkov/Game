@@ -383,7 +383,7 @@ void drawBoard(){
   }
  wherey = shifty;
 
- writeStr(wherex,wherey+1,"[ESC: EXIT | TYPE <help> for more]", B_BLACK, F_GREY);
+ writeStr(wherex, wherey + 1, "[ESC: EXIT | TYPE <help> for more | TYPE <word> for show alphabet]", B_BLACK, F_GREY);
 }
 
 void cleanArea()
@@ -415,6 +415,55 @@ void displayHelp(){
    writeStr(1,oldy+11,"Possible words: ", B_BLACK, F_GREY);
    writeNum(18,oldy+11,words2, B_BLACK, F_GREY);
    writeStr(1,oldy+13, "Press <ENTER> or <ESC> key to return.", B_BLACK, F_WHITE);
+   wherex=oldx;
+   wherey=oldy;
+   do{
+      gotoxy(1,1);
+      printf("\n");
+      if (kbhit()) ch = readch();
+      if (ch == K_ESCAPE) break;
+   } while (ch != K_ENTER);
+   cleanArea();
+}
+
+void displayAlphabet(){
+  char ch=0;
+   cleanArea();
+   writeStr(1,oldy,"C-WORDLE", B_WHITE, F_BLACK);
+   writeStr(1,oldy+1,"Check it out. Alphabet where you can find typed letters", B_BLACK, F_WHITE);
+
+   writeStr(oldx + 1, 3,"[A]", B_BLACK, F_WHITE);
+   writeStr(oldx + 5, 3,"[B]", B_BLACK, F_WHITE);
+   writeStr(oldx + 9, 3,"[C]", B_BLACK, F_WHITE);
+   writeStr(oldx + 13, 3,"[D]", B_BLACK, F_WHITE);
+   writeStr(oldx + 17, 3,"[E]", B_BLACK, F_WHITE);
+   writeStr(oldx + 21, 3,"[F]", B_BLACK, F_WHITE);
+   writeStr(oldx + 25, 3,"[G]", B_BLACK, F_WHITE);
+
+   writeStr(oldx + 1, 4 ,"[H]", B_BLACK, F_WHITE);
+   writeStr(oldx + 5, 4 ,"[I]", B_BLACK, F_WHITE);
+   writeStr(oldx + 9, 4 ,"[J]", B_BLACK, F_WHITE);
+   writeStr(oldx + 13, 4 ,"[K]", B_BLACK, F_WHITE);
+   writeStr(oldx + 17, 4 ,"[L]", B_BLACK, F_WHITE);
+   writeStr(oldx + 21, 4 ,"[M]", B_BLACK, F_WHITE);
+   writeStr(oldx + 25, 4 ,"[N]", B_BLACK, F_WHITE);
+
+   writeStr(oldx + 1, 5, "[O]", B_BLACK, F_WHITE);
+   writeStr(oldx + 5, 5, "[P]", B_BLACK, F_WHITE);
+   writeStr(oldx + 9, 5, "[Q]", B_BLACK, F_WHITE);
+   writeStr(oldx + 13, 5,"[R]", B_BLACK, F_WHITE);
+   writeStr(oldx + 17, 5,"[S]", B_BLACK, F_WHITE);
+   writeStr(oldx + 21, 5,"[T]", B_BLACK, F_WHITE);
+   writeStr(oldx + 25, 5,"[U]", B_BLACK, F_WHITE);
+
+   writeStr(oldx + 1, 6,"[V]", B_BLACK, F_WHITE);
+   writeStr(oldx + 5, 6,"[W]", B_BLACK, F_WHITE);
+   writeStr(oldx + 9, 6,"[X]", B_BLACK, F_WHITE);
+   writeStr(oldx + 13, 6,"[Y]", B_BLACK, F_WHITE);
+   writeStr(oldx + 17, 6,"[Z]", B_BLACK, F_WHITE);
+
+   writeStr(1, 8,"Type <exit> or <quit> to exit.", B_BLACK, F_WHITE);
+   writeStr(1, 9, "Press <ENTER> or <ESC> key to return.", B_BLACK, F_WHITE);
    wherex=oldx;
    wherey=oldy;
    do{
@@ -533,7 +582,7 @@ int cheat=0;
        memset(&textbox1,'\0',sizeof(textbox1));
        cheat=1;
       }
-     if (strcmp(textbox1,"help") == 0)
+     if ((strcmp(textbox1, "help") == 0) || (strcmp(textbox1, "word") == 0))
        break;
       if (strlen(textbox1) == 5){
          checkRepeatedLetters();
@@ -566,6 +615,8 @@ int cheat=0;
    if (strcmp(textbox1,"help") == 0){
      displayHelp();
      newGame();
+  } else if (strcmp(textbox1, "word") == 0) {
+    displayAlphabet();
   }
 }
 
