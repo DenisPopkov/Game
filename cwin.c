@@ -123,6 +123,7 @@ void getWordfromDictionary(FILE * fileHandler, char WORD[MAX_TEXTBOX]);
 int isWordinDictionary(FILE * fileHandler, char WORD[MAX_TEXTBOX]);
 int closeFile(FILE * fileHandler);
 
+// Скрывает или показывает курсор на игровом поле
 void setCursor(int isVisible) {
    HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
    CONSOLE_CURSOR_INFO info;
@@ -131,21 +132,22 @@ void setCursor(int isVisible) {
    SetConsoleCursorInfo(consoleHandle, &info);
 }
 
+// Стирает информацию с игровго поля
 void cls() {
   system("cls");
 }
 
-// Detect whether a key has been pressed
+// Обнаруживает если была нажата клавиша на клавиатуре
 int kbhit() {
    return _kbhit();
 }
 
-// Read 1 character - echo defines echo mode
+// Считывает одну букву
 TCHAR readch() {
   return _getch();
 }
 
-// Move cursor to specified position
+// Двигает курсор к определенной позиции
 void gotoxy(int x, int y) {
   COORD coord;
   coord.X = x;
@@ -153,19 +155,18 @@ void gotoxy(int x, int y) {
   SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
-// Change colour output
-void outputcolor (int foreground, int background) {
+// Изменяет задний фон
+void outputcolor(int foreground, int background) {
   HANDLE h = GetStdHandle (STD_OUTPUT_HANDLE);
   WORD wOldColorAttrs;
   CONSOLE_SCREEN_BUFFER_INFO csbiInfo;
-  // First save the current color information
   GetConsoleScreenBufferInfo(h, &csbiInfo);
   wOldColorAttrs = csbiInfo.wAttributes;
-  // Set the new color information
+  // Устанавливает текущий цвет
   SetConsoleTextAttribute ( h, foreground | background );
 }
 
-// Change the whole color of the screen by applying CLS
+// Изменяет весь цвет в программе
 void screencol(int x) {
   HANDLE hStdOut;
   HANDLE h = GetStdHandle ( STD_OUTPUT_HANDLE );
@@ -183,7 +184,7 @@ void screencol(int x) {
   SetConsoleCursorPosition( hStdOut, homeCoords );
 }
 
-// Get terminal dimensions
+// Получает размер терминала
 int getTerminalDimensions(int *rows, int *columns) {
   HANDLE hStdOut;
   CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -198,24 +199,24 @@ int getTerminalDimensions(int *rows, int *columns) {
   return 0;
 }
 
-// Write word to terminal
+// Пишет слово в терминал
 void writeStr(int wherex, int wherey, char *str, int backcolor, int forecolor){
   gotoxy(wherex,wherey);
   outputcolor(backcolor,forecolor);
   printf("%s", str);
 }
 
-// Write letter to terminal
+// Пишет букву в терминал
 void writeCh(int wherex, int wherey, wchar_t ch, int backcolor, int forecolor){
-  // Write unicode character
+  // Записывает Юникод символ в терминал
   gotoxy(wherex,wherey);
   outputcolor(backcolor,forecolor);
   printf("%lc", ch);
 }
 
-// Write number to terminal
+// Записывает число в терминал
 int writeNum(int x, int y, int num, char backcolor, char forecolor) {
-  // The length of the string must be passed on the function
+  // Длина строки должна быть передана функции
   char astr[30];
   char len = 0;
   sprintf(astr, "%d", num);
@@ -251,13 +252,13 @@ char textbox(int wherex, int wherey, int displayLength,
   }
   writeCh(positionx + displayLength + 1, wherey, ']', backcolor,
 	   textcolor);
-  //Reset keyboard
+  // Убирает все с клавиатуры
   if(kbhit() == 1) ch = readch();
   ch = 0;
 
   do {
       keypressed = kbhit();
-    //Cursor Animation
+    // Анимация курсора
    if (keypressed == 0){
 
    cursorCount++;
@@ -283,7 +284,6 @@ char textbox(int wherex, int wherey, int displayLength,
       }
      }
     }
-    //Process keys
     if(keypressed == 1) {
       ch = readch();
       keypressed = 0;
@@ -310,9 +310,9 @@ char textbox(int wherex, int wherey, int displayLength,
     if(ch == K_ENTER || ch == K_ESCAPE)
       exitFlag = 1;
 
-    //ENTER OR ESC TO FINISH LOOP
+    // ENTER или ESC чтобы закончить игру
   } while(exitFlag != 1);
-  //clear cursor
+  // Очищает курсор
   writeCh(posCursor, wherey, ' ', backcolor, textcolor);
   return ch;
 }
@@ -321,22 +321,22 @@ void window(int x1, int y1, int x2, int y2, int backcolor, int bordercolor, int 
   int i, j;
   i = x1;
   j = y1;
-  //borders
+  // Определяет окончание ячеек
   if (border == 1) {
     for (i = x1; i <= x2; i++) {
-      //upper and lower borders
-      writeCh(i, y1, HOR_LINE, backcolor, bordercolor); // Horizontal line box-like char
+      // Нижнии и верхнии окончания ячеек
+      writeCh(i, y1, HOR_LINE, backcolor, bordercolor); // Горизонтальный разделитель ячеек
       writeCh(i, y2, HOR_LINE, backcolor, bordercolor);
     }
     for(j = y1; j <= y2; j++) {
-      // Left and right borders
-      writeCh(x1, j, VER_LINE, backcolor, bordercolor); // Vertical line box-like char
+      // Левые и правые окончания ячеек
+      writeCh(x1, j, VER_LINE, backcolor, bordercolor); // Вертикальный разделитель ячеек
       writeCh(x2, j, VER_LINE, backcolor, bordercolor);
     }
-    writeCh(x1, y1, UPPER_LEFT_CORNER, backcolor, bordercolor); // Upper-left corner box-like char
-    writeCh(x1, y2, LOWER_LEFT_CORNER, backcolor, bordercolor); // Lower-left corner box-like char
-    writeCh(x2, y1, UPPER_RIGHT_CORNER, backcolor, bordercolor); // Upper-right corner box-like char
-    writeCh(x2, y2, LOWER_RIGHT_CORNER, backcolor, bordercolor); // Lower-right corner box-like char
+    writeCh(x1, y1, UPPER_LEFT_CORNER, backcolor, bordercolor);
+    writeCh(x1, y2, LOWER_LEFT_CORNER, backcolor, bordercolor);
+    writeCh(x2, y1, UPPER_RIGHT_CORNER, backcolor, bordercolor);
+    writeCh(x2, y2, LOWER_RIGHT_CORNER, backcolor, bordercolor);
   }
   if (title == 1) {
     for(i = x1; i <= x2; i++)
@@ -345,14 +345,14 @@ void window(int x1, int y1, int x2, int y2, int backcolor, int bordercolor, int 
 }
 
 void toUpper(char *text){
-//CHANGE LETTERS TO UPPERCASE
+// Делает буквы заглавными
 size_t i = 0;
  for (i = 0; i < strlen(text); i++){
     if (text[i] >= 97 && text[i] <= 122) text[i] = text[i] - 32;
   }
 }
 
-// Drawning board
+// Рисует игровое поле
 void drawBoard(){
  int i=0,  j=0, shiftx=0, shifty =0;
  int sizeX = 4;
