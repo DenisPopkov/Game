@@ -1,30 +1,30 @@
 /*
-Wordle for Terminal. 
-Author - Popkov Denis, 21m
+Игра с графическим интерфейсом - Wordle.
+Автор - Попков Денис, 21м
 */
 
-// Include libraries, dependencies
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <locale.h>
-#include <time.h>
-#include <windows.h>
-#include <wchar.h>
-#include "conio.h"
+// Добавление библиотек и зависимостей
+#include <stdio.h> // Библиотека ввода и вывода
+#include <stdlib.h> // Содержит в себе функции, занимающиеся выделением памяти
+#include <string.h> // Работа с строками
+#include <locale.h> // Локализация
+#include <time.h> // Работа с датой и временем
+#include <windows.h> // Работа с системой Windows
+#include <wchar.h> // Хранения широких символов
+#include "conio.h" // Создание текстового интерфейса в консоли
 
-// Provide 'dummyWord' for testing
+// Слово для проверки работы программы
 #define dummyWord "ERASE\0"
-// Count of row text box
+// Число столбцов
 #define MAX_TEXTBOX 6
-// Words in the dictionary file should have 5 chars and a 0x0A at the end
+// Разделитель для слов, их всего может быть 5
 #define SEPARATOR 0x0A
-// Dictionary of all words
+// Словарь всех слов
 #define DICTIONARY "dict.txt"
-// Dictionary of possible words, that can be use by user
+// Словарь возможных слов, которые может ввести игрок
 #define POSSIBLES "possible.txt"
 
-// UNICODE chars for creating board in terminal
+// Значения Юникод символов для создания игрового поля
 #define HOR_LINE 196
 #define VER_LINE 179
 #define UPPER_LEFT_CORNER 218
@@ -32,19 +32,19 @@ Author - Popkov Denis, 21m
 #define UPPER_RIGHT_CORNER 191
 #define LOWER_RIGHT_CORNER 217
 
-// Provide keys, that can be push by user keyboard and can be catched
+// Символы для определения какие символы были нажаты с клавиатуры
 #define K_BACKSPACE 8
 #define K_ENTER 13
 #define K_ESCAPE 27
 #define K_ENTER2 10
 
-// Background colors low intensity
+// Цвета заднего фона
 #define B_BLACK 0
 #define B_GREEN 37
 #define B_YELLOW 110
 #define B_WHITE 128
 
-// Foreground colors low intensity
+// Цвета переднего фона
 #define F_BLACK 0
 #define F_RED 12
 #define F_GREEN 10
@@ -55,11 +55,11 @@ Author - Popkov Denis, 21m
 #define F_WHITE 15
 #define F_GREY 8
 
-// Fields for board size
+// Значения для размера поля
 #define BOARDSIZEY 21
 #define BOARDSIZEX 35
 
-// Game board
+// Игровое поле
 char boardInputs[7][6];
 char secretWord[6];
 char textbox1[MAX_TEXTBOX];
@@ -67,7 +67,7 @@ int  repeatedLetters[5] = {1, 1, 1, 1, 1};
 char textbox1[MAX_TEXTBOX];
 int checkTrue[5] = {0, 0, 0, 0, 0};
 
-// Structures and fields for the files, position of letter/word
+// Структуры и поля для файлов, позиции на поле слов и букв
 static int peekCharacter = -1;
 int rows = 0, columns = 0;
 int wherey = 0, wherex = 0;
@@ -76,7 +76,7 @@ int currentIndex = 0;
 int okFile, okFile2;
 int dictionaryPresent = 0;
 
-// Pointer to dict files
+// Указатели на словари
 FILE *fileSource;
 FILE *fileSource2;
 time_t t;
@@ -84,26 +84,25 @@ unsigned randomWord = 0;
 unsigned words = 0;
 unsigned words2 = 0;
 
-// Provide func for working with terminal, simple CRUD operation there
-// Also we can control letter, cursor position
+// Описаны функции для работы с терминалом
+// Контроль курсора, позиции
 int kbhit();
 TCHAR readch();
 void resetch();
 void gotoxy(int x, int y);
 void outputcolor(int foreground, int background);
 int getTerminalDimensions(int *rows, int *columns);
-void showcursor();
-void hidecursor();
+void setCursor(int isVisible);
 void cls();
 
-// Provide func that write, read word/letter to terminal box
+// Описаны функции для чтения, записи слов в поле
 void writeStr(int wherex, int wherey, char *str, int backcolor, int forecolor);
 char textbox(int wherex, int wherey, int displayLength,char label[MAX_TEXTBOX], char text[MAX_TEXTBOX], int backcolor, int labelcolor, int textcolor);
 void writeCh(int wherex, int wherey, wchar_t  ch, int backcolor, int forecolor);
 int writeNum(int x, int y, int num, char backcolor, char forecolor);
 void window(int x1, int y1, int x2, int y2, int backcolor, int bordercolor, int titlecolor, int border, int title);
 
-// Provide func that working with terminal drawing board
+// Описаны функции для прорисовки игрового поля
 void toUpper(char *text);
 void newGame();
 void gameLoop();
@@ -117,26 +116,18 @@ void writeWord(int index,  char text[MAX_TEXTBOX]);
 void cleanArea();
 int findIndex(char c);
 
-// Worling with dict size
+// Работы с размером словаря
 int openFile(FILE ** fileHandler, char *fileName, char *mode);
 long countWords(FILE * fileHandler);
 void getWordfromDictionary(FILE * fileHandler, char WORD[MAX_TEXTBOX]);
 int isWordinDictionary(FILE * fileHandler, char WORD[MAX_TEXTBOX]);
 int closeFile(FILE * fileHandler);
 
-void hidecursor() {
+void setCursor(int isVisible) {
    HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
    CONSOLE_CURSOR_INFO info;
    info.dwSize = 100;
-   info.bVisible = FALSE;
-   SetConsoleCursorInfo(consoleHandle, &info);
-}
-
-void showcursor() {
-   HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-   CONSOLE_CURSOR_INFO info;
-   info.dwSize = 100;
-   info.bVisible = TRUE;
+   info.bVisible = isVisible;
    SetConsoleCursorInfo(consoleHandle, &info);
 }
 
@@ -734,7 +725,7 @@ int main() {
       exit(0);
    }
    cls();
-   hidecursor();
+   setCursor(0);
 
    //SEARCH FOR DICTIONARY
    okFile = openFile(&fileSource, DICTIONARY, "r");
@@ -759,7 +750,7 @@ int main() {
      if (fileSource != NULL) closeFile(fileSource);
      if (fileSource2 != NULL) closeFile(fileSource2);
      credits();
-     showcursor();
+     setCursor(1);
    }
   return 0;
 }
