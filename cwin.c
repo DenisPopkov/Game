@@ -97,7 +97,8 @@ void cls();
 
 // Описаны функции для чтения, записи слов в поле
 void writeStr(int wherex, int wherey, char *str, int backcolor, int forecolor);
-char textbox(int wherex, int wherey, int displayLength,char label[MAX_TEXTBOX], char text[MAX_TEXTBOX], int backcolor, int labelcolor, int textcolor);
+char textbox(int wherex, int wherey, int displayLength,char label[MAX_TEXTBOX], char text[MAX_TEXTBOX], 
+int backcolor, int labelcolor, int textcolor);
 void writeCh(int wherex, int wherey, wchar_t  ch, int backcolor, int forecolor);
 int writeNum(int x, int y, int num, char backcolor, char forecolor);
 void window(int x1, int y1, int x2, int y2, int backcolor, int bordercolor, int titlecolor, int border, int title);
@@ -224,7 +225,6 @@ int writeNum(int x, int y, int num, char backcolor, char forecolor) {
   len = strlen(astr);
   return len;
 }
-
 
 char textbox(int wherex, int wherey, int displayLength,
 	char label[MAX_TEXTBOX], char text[MAX_TEXTBOX], int backcolor,
@@ -374,7 +374,7 @@ void drawBoard(){
   }
  wherey = shifty;
 
- writeStr(wherex, wherey + 1, "[ESC: EXIT | TYPE <help> for more | TYPE <word> for show alphabet]", B_BLACK, F_GREY);
+ writeStr(wherex, wherey + 1, "[ESC: EXIT | TYPE <help> for more", B_BLACK, F_GREY);
 }
 
 void cleanArea()
@@ -417,57 +417,7 @@ void displayHelp(){
    cleanArea();
 }
 
-void displayAlphabet(){
-  char ch=0;
-   cleanArea();
-   writeStr(1,oldy,"C-WORDLE", B_WHITE, F_BLACK);
-   writeStr(1,oldy+1,"Check it out. Alphabet where you can find typed letters", B_BLACK, F_WHITE);
-
-   writeStr(oldx + 1, 3,"[A]", B_BLACK, F_WHITE);
-   writeStr(oldx + 5, 3,"[B]", B_BLACK, F_WHITE);
-   writeStr(oldx + 9, 3,"[C]", B_BLACK, F_WHITE);
-   writeStr(oldx + 13, 3,"[D]", B_BLACK, F_WHITE);
-   writeStr(oldx + 17, 3,"[E]", B_BLACK, F_WHITE);
-   writeStr(oldx + 21, 3,"[F]", B_BLACK, F_WHITE);
-   writeStr(oldx + 25, 3,"[G]", B_BLACK, F_WHITE);
-
-   writeStr(oldx + 1, 4 ,"[H]", B_BLACK, F_WHITE);
-   writeStr(oldx + 5, 4 ,"[I]", B_BLACK, F_WHITE);
-   writeStr(oldx + 9, 4 ,"[J]", B_BLACK, F_WHITE);
-   writeStr(oldx + 13, 4 ,"[K]", B_BLACK, F_WHITE);
-   writeStr(oldx + 17, 4 ,"[L]", B_BLACK, F_WHITE);
-   writeStr(oldx + 21, 4 ,"[M]", B_BLACK, F_WHITE);
-   writeStr(oldx + 25, 4 ,"[N]", B_BLACK, F_WHITE);
-
-   writeStr(oldx + 1, 5, "[O]", B_BLACK, F_WHITE);
-   writeStr(oldx + 5, 5, "[P]", B_BLACK, F_WHITE);
-   writeStr(oldx + 9, 5, "[Q]", B_BLACK, F_WHITE);
-   writeStr(oldx + 13, 5,"[R]", B_BLACK, F_WHITE);
-   writeStr(oldx + 17, 5,"[S]", B_BLACK, F_WHITE);
-   writeStr(oldx + 21, 5,"[T]", B_BLACK, F_WHITE);
-   writeStr(oldx + 25, 5,"[U]", B_BLACK, F_WHITE);
-
-   writeStr(oldx + 1, 6,"[V]", B_BLACK, F_WHITE);
-   writeStr(oldx + 5, 6,"[W]", B_BLACK, F_WHITE);
-   writeStr(oldx + 9, 6,"[X]", B_BLACK, F_WHITE);
-   writeStr(oldx + 13, 6,"[Y]", B_BLACK, F_WHITE);
-   writeStr(oldx + 17, 6,"[Z]", B_BLACK, F_WHITE);
-
-   writeStr(1, 8,"Type <exit> or <quit> to exit.", B_BLACK, F_WHITE);
-   writeStr(1, 9, "Press <ENTER> or <ESC> key to return.", B_BLACK, F_WHITE);
-   wherex=oldx;
-   wherey=oldy;
-   do{
-      gotoxy(1,1);
-      printf("\n");
-      if (kbhit()) ch = readch();
-      if (ch == K_ESCAPE) break;
-   } while (ch != K_ENTER);
-   cleanArea();
-}
-
 int findIndex(char c)
-//returns the index of a char in an array of chars
 {
   int i=0; char ch=0;
   do{
@@ -483,7 +433,6 @@ char ch=0;
 size_t i=0;
 size_t lindex=index;
 int col=B_BLACK; int letterIndex=0;
-  //color letters accordingly
   letterIndex= findIndex(c);
    for (i=0; i<strlen(str); i++){
      ch = str[i];
@@ -502,7 +451,6 @@ size_t i=0;
 int col=B_BLACK, letterIndex=0;
 
   letterIndex= findIndex(c);
-  //color letters accordingly
    for (i=0; i<strlen(str); i++){
      ch = str[i];
      if (c == ch &&  repeatedLetters[letterIndex] >0 && checkTrue[index]==0) {
@@ -514,7 +462,6 @@ int col=B_BLACK, letterIndex=0;
  return col;
 }
 
-
 void writeWord(int index, char text[MAX_TEXTBOX]){
     int j=0,i=0, x=0, y=0, col=B_BLACK;
     x = oldx + 6;
@@ -523,16 +470,13 @@ void writeWord(int index, char text[MAX_TEXTBOX]){
     checkRepeatedLetters();
     for(j=0; j<index;j++)
      y = y + 3;
-    //clean array of true values
     for (i=0; i<5; i++) checkTrue[i] = 0;
-    //Search for Green letters
     for (i=0; i<MAX_TEXTBOX; i++)
        {
            col=checkGreen(text[i], i, secretWord);
            writeCh(x, y, text[i], col, F_WHITE);
            x = x + 5;
        }
-    //Search for Orange and Black letters
     x = oldx + 6;
     for (i=0; i<5; i++)
        {
@@ -585,7 +529,7 @@ int cheat=0;
              writeStr(wherex+16,wherey+2,"->VALID WORD!                   ", B_BLACK, F_GREEN);
              if (currentIndex<6) currentIndex++;
              if (strcmp(textbox1,secretWord) == 0){
-               writeStr(wherex,wherey+1,"->SUCCESS!                        ", B_BLACK, F_BLUE);
+               writeStr(wherex,wherey+1,"->SUCCESS!", B_BLACK, F_BLUE);
                break;
               } else{
              if (currentIndex == 6) {
@@ -606,15 +550,12 @@ int cheat=0;
    if (strcmp(textbox1,"help") == 0){
      displayHelp();
      newGame();
-  } else if (strcmp(textbox1, "word") == 0) {
-    displayAlphabet();
   }
 }
 
 void newGame(){
 int i=0;
  drawBoard();
-//Rewrite previous words on panel
    if (currentIndex >0){
      for (i=0; i<=currentIndex; i++)
        writeWord(i, boardInputs[i]);
@@ -623,10 +564,8 @@ int i=0;
 }
 
 int openFile(FILE ** fileHandler, char *fileName, char *mode) {
-  int     ok;
+  int ok;
   *fileHandler = fopen(fileName, mode);
-  //check whether buffer is assigned
-  //and return value
   if(*fileHandler != NULL)
     ok = 1;
   else
@@ -638,12 +577,10 @@ long countWords(FILE * fileHandler) {
   long    wordCount = 0;
   char    ch;
 
-  //Read char by char
   if(fileHandler != NULL) {
-    rewind(fileHandler);	//Go to start of file
-    ch = getc(fileHandler);	//peek into file
+    rewind(fileHandler);
+    ch = getc(fileHandler);
     while(!feof(fileHandler)) {
-      //Read until SEPARATOR 0x0A
       if(ch == SEPARATOR) {
 	wordCount++;
       }
@@ -653,25 +590,22 @@ long countWords(FILE * fileHandler) {
   return wordCount;
 }
 
+
 void getWordfromDictionary(FILE * fileHandler, char WORD[MAX_TEXTBOX]) {
   long    i = 0;
   char    ch;
   char    dataString[MAX_TEXTBOX];
 
-  //Read char by char
   if(fileHandler != NULL) {
     rewind(fileHandler);
-    //Go to where the word starts 6bytes * randomWord
     fseek(fileHandler,MAX_TEXTBOX*randomWord, SEEK_SET);
-    ch = getc(fileHandler);	//peek into file
+    ch = getc(fileHandler);
     while(i<5) {
-      //Read until SEPARATOR 0x0A
       if (ch!= SEPARATOR) dataString[i++] = ch;
-      //i++;
       ch = getc(fileHandler);
     }
   }
-  dataString[i] = '\0';	// null-end string
+  dataString[i] = '\0';
   i = 0;
   strcpy(WORD, dataString);
 }
@@ -684,14 +618,12 @@ int isWordinDictionary(FILE * fileHandler, char WORD[MAX_TEXTBOX]) {
 
   //Read char by char
   if(fileHandler != NULL) {
-    rewind(fileHandler);	//Go to start of file
-    ch = getc(fileHandler);	//peek into file
+    rewind(fileHandler);
+    ch = getc(fileHandler);
     while(!feof(fileHandler)) {
-      //Read until SEPARATOR 0x0A
       if (ch != SEPARATOR) dataString[i++] = ch;
-      //i++;
       if(ch == SEPARATOR) {
-	dataString[i] = '\0';	// null-end string
+	dataString[i] = '\0';
         if (strcmp(dataString, WORD) == 0) {isFound = 1; break;}
 	i = 0;
       }
@@ -715,7 +647,6 @@ void credits(){
 
 int main() {
    srand((unsigned) time(&t));
-   //INIT TERMINAL
    oldx = wherex;
    oldy = wherey;
    getTerminalDimensions(&rows, &columns);
@@ -727,25 +658,22 @@ int main() {
    cls();
    setCursor(0);
 
-   //SEARCH FOR DICTIONARY
+   // Поиск в словаре
    okFile = openFile(&fileSource, DICTIONARY, "r");
    okFile2 = openFile(&fileSource2, POSSIBLES, "r");
    if (okFile == 0 || okFile2 == 0) {
-     //No dictionary
      dictionaryPresent = 0;
      words = 1;
      strcpy(secretWord, dummyWord);
      printf("ERROR: Dictionary file(s) is missing. Create file <dict.txt> and/or <possibles.txt>\n");
      exit(0);
    } else {
-     //Dictionary is present
      dictionaryPresent = 1;
      words = countWords(fileSource);
      words2 = countWords(fileSource2);
-     //Selecting a random word from dictionary
+     // Выбор случайного слова из словаря
      randomWord = rand() % words2;
      getWordfromDictionary(fileSource2, secretWord);
-     //GAME
      newGame();
      if (fileSource != NULL) closeFile(fileSource);
      if (fileSource2 != NULL) closeFile(fileSource2);
