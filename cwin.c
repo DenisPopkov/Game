@@ -557,12 +557,12 @@ int cheat=0;
              if (currentIndex<6) currentIndex++;
              if (strcmp(textbox1,secretWord) == 0){
                writeStr(wherex,wherey+1,"->SUCCESS!", B_BLACK, F_BLUE);
-               delete("autosave");
+               remove("autosave.bin");
                break;
               } else{
              if (currentIndex == 6) {
               writeStr(wherex,wherey+1,"->GAME OVER:                     ", B_BLACK, F_MAGENTA);
-              delete("autosave");
+              remove("autosave.bin");
               writeStr(wherex+14,wherey+1,secretWord, B_BLACK, F_GREEN);
              break;
             }
@@ -693,7 +693,6 @@ int main() {
   readArray(rows, cols, myArray);
   strcpy(boardInputs, myArray);
   free(myArray);
-  deleteRecordByName("autosave");
 
    srand((unsigned) time(&t));
    oldx = wherex;
