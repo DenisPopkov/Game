@@ -501,6 +501,36 @@ for (i=0; i<5; i++) repeatedLetters[i] = 1;
    }
 }
 
+void autoSave() {
+   int result = EXIT_SUCCESS;
+   char file_name[] = "autosave.bin";
+   FILE * fp = fopen(file_name, "wb");
+   
+   if (fp == NULL) {
+     result = EXIT_FAILURE;
+     fprintf(stderr, "fopen() failed for '%s'\n", file_name);
+   }
+   else {
+     size_t element_size = sizeof *boardInputs;
+     size_t elements_to_write = sizeof boardInputs;
+     size_t elements_written = fwrite(boardInputs, element_size, elements_to_write, fp); 
+     if (elements_written != elements_to_write) {
+        result = EXIT_FAILURE;
+        fprintf(stderr, "fwrite() failed: wrote only %zu out of %zu elements.\n", 
+        elements_written, elements_to_write);
+     }
+
+     fclose(fp);
+   }
+}
+
+void deleteRecordByName(char *fname) {
+	FILE *fp;
+	fp = fopen(fname, "rb");
+	fclose(fp);
+	remove(fname);
+}
+
 void gameLoop() {
 char ch=0;
 int cheat=0;
@@ -523,6 +553,7 @@ int cheat=0;
       if (strlen(textbox1) == 5){
          checkRepeatedLetters();
          toUpper(textbox1);
+         autoSave();
 
          if (isWordinDictionary(fileSource,textbox1) == 1) {
              writeWord(currentIndex, textbox1);
@@ -531,10 +562,12 @@ int cheat=0;
              if (currentIndex<6) currentIndex++;
              if (strcmp(textbox1,secretWord) == 0){
                writeStr(wherex,wherey+1,"->SUCCESS!", B_BLACK, F_BLUE);
+               deleteRecordByName("autosave.bin");
                break;
               } else{
              if (currentIndex == 6) {
               writeStr(wherex,wherey+1,"->GAME OVER:                     ", B_BLACK, F_MAGENTA);
+              deleteRecordByName("autosave.bin");
               writeStr(wherex+14,wherey+1,secretWord, B_BLACK, F_GREEN);
              break;
             }
@@ -640,36 +673,33 @@ int closeFile(FILE * fileHandler) {
   return ok;
 }
 
-void credits(){
+void credits() {
   gotoxy(wherex,wherey+2);
   printf("\r");
   printf("C-Wordle. Coded by Popkov Denis, 21m 2022                   \n");
 }
 
-void autoSave() {
-  char file_name[] = "autosave.bin";
-   char str[] = "This is a binary file example";
-   FILE * fp = fopen(file_name, "wb");
-   
-   if (fp == NULL) {
-     result = EXIT_FAILURE;
-     fprintf(stderr, "fopen() failed for '%s'\n", file_name);
-   }
-   else {
-     size_t element_size = sizeof *str;
-     size_t elements_to_write = sizeof str;
-     size_t elements_written = fwrite(str, element_size, elements_to_write, fp); 
-     if (elements_written != elements_to_write) {
-        result = EXIT_FAILURE;
-        fprintf(stderr, "fwrite() failed: wrote only %zu out of %zu elements.\n", 
-        elements_written, elements_to_write);
-     }
+void* allocArray (int rows, int cols) {
+  return malloc(sizeof(char[rows][cols]));
+}
 
-     fclose(fp);
-   }
+void readArray (int rows, int cols, char array[rows][cols]) {
+   FILE *data;
+   data = fopen("autosave.bin", "rb");
+   fread(array, sizeof(char[rows][cols]), 1, data);
 }
 
 int main() {
+
+  int cols = 7;
+  int rows = 6;
+  char (*myArray)[cols] = allocArray(rows, cols);
+
+  readArray(rows, cols, myArray);
+  strcpy(boardInputs, myArray);
+  free(myArray);
+  deleteRecordByName("autosave.bin");
+
    srand((unsigned) time(&t));
    oldx = wherex;
    oldy = wherey;
