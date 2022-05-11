@@ -500,11 +500,12 @@ for (i=0; i<5; i++) repeatedLetters[i] = 1;
       }
    }
 }
-void gameLoop(){
+
+void gameLoop() {
 char ch=0;
 int cheat=0;
 
-  do{
+  do {
     cheat=0;
     memset(&textbox1,'\0',sizeof(textbox1));
      ch = textbox(1,wherey+2,5,"[+] Word:",textbox1,F_WHITE,F_WHITE,F_WHITE);
@@ -643,6 +644,29 @@ void credits(){
   gotoxy(wherex,wherey+2);
   printf("\r");
   printf("C-Wordle. Coded by Popkov Denis, 21m 2022                   \n");
+}
+
+void autoSave() {
+  char file_name[] = "autosave.bin";
+   char str[] = "This is a binary file example";
+   FILE * fp = fopen(file_name, "wb");
+   
+   if (fp == NULL) {
+     result = EXIT_FAILURE;
+     fprintf(stderr, "fopen() failed for '%s'\n", file_name);
+   }
+   else {
+     size_t element_size = sizeof *str;
+     size_t elements_to_write = sizeof str;
+     size_t elements_written = fwrite(str, element_size, elements_to_write, fp); 
+     if (elements_written != elements_to_write) {
+        result = EXIT_FAILURE;
+        fprintf(stderr, "fwrite() failed: wrote only %zu out of %zu elements.\n", 
+        elements_written, elements_to_write);
+     }
+
+     fclose(fp);
+   }
 }
 
 int main() {
