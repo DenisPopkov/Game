@@ -524,12 +524,7 @@ void autoSave() {
    }
 }
 
-void deleteRecordByName(char *fname) {
-	FILE *fp;
-	fp = fopen(fname, "rb");
-	fclose(fp);
-	remove(fname);
-}
+int remove(const char * filename);
 
 void gameLoop() {
 char ch=0;
@@ -562,12 +557,12 @@ int cheat=0;
              if (currentIndex<6) currentIndex++;
              if (strcmp(textbox1,secretWord) == 0){
                writeStr(wherex,wherey+1,"->SUCCESS!", B_BLACK, F_BLUE);
-               deleteRecordByName("autosave.bin");
+               delete("autosave");
                break;
               } else{
              if (currentIndex == 6) {
               writeStr(wherex,wherey+1,"->GAME OVER:                     ", B_BLACK, F_MAGENTA);
-              deleteRecordByName("autosave.bin");
+              delete("autosave");
               writeStr(wherex+14,wherey+1,secretWord, B_BLACK, F_GREEN);
              break;
             }
@@ -698,7 +693,7 @@ int main() {
   readArray(rows, cols, myArray);
   strcpy(boardInputs, myArray);
   free(myArray);
-  deleteRecordByName("autosave.bin");
+  deleteRecordByName("autosave");
 
    srand((unsigned) time(&t));
    oldx = wherex;
