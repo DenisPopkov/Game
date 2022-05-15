@@ -12,6 +12,7 @@
 #include <windows.h> // Работа с системой Windows
 #include <wchar.h> // Хранения широких символов
 #include "conio.h" // Создание текстового интерфейса в консоли
+#include <errno.h>
 
 // Слово для проверки работы программы
 #define dummyWord "ERASE\0"
@@ -23,6 +24,9 @@
 #define DICTIONARY "dict.txt"
 // Словарь возможных слов, которые может ввести игрок
 #define POSSIBLES "possible.txt"
+
+#define WORD_COUNT 7
+#define WORD_LEN 6
 
 // Значения Юникод символов для создания игрового поля
 #define HOR_LINE 196
@@ -60,7 +64,8 @@
 #define BOARDSIZEX 35
 
 // Игровое поле
-char boardInputs[7][6];
+char boardInputs[WORD_COUNT][WORD_LEN];
+const char *autoSaveFilename = "autosave.bin";
 char secretWord[6];
 char textbox1[MAX_TEXTBOX];
 int  repeatedLetters[5] = {1, 1, 1, 1, 1};
@@ -75,6 +80,7 @@ int oldy = 0, oldx = 0;
 int currentIndex = 0;
 int okFile, okFile2;
 int dictionaryPresent = 0;
+static int flag = 0; // единожды увеличит индекс
 
 // Указатели на словари
 FILE *fileSource;
@@ -501,27 +507,26 @@ for (i=0; i<5; i++) repeatedLetters[i] = 1;
    }
 }
 
-void autoSave() {
-   int result = EXIT_SUCCESS;
-   char file_name[] = "autosave.bin";
-   FILE * fp = fopen(file_name, "wb");
+int autoSave(void) {
+    int result = EXIT_SUCCESS;
+    FILE *fp = fopen(autoSaveFilename, "wb");
    
-   if (fp == NULL) {
-     result = EXIT_FAILURE;
-     fprintf(stderr, "fopen() failed for '%s'\n", file_name);
-   }
-   else {
-     size_t element_size = sizeof *boardInputs;
-     size_t elements_to_write = sizeof boardInputs;
-     size_t elements_written = fwrite(boardInputs, element_size, elements_to_write, fp); 
-     if (elements_written != elements_to_write) {
+    if (fp == NULL) {
         result = EXIT_FAILURE;
-        fprintf(stderr, "fwrite() failed: wrote only %zu out of %zu elements.\n", 
-        elements_written, elements_to_write);
-     }
-
-     fclose(fp);
-   }
+        fprintf(stderr, "fopen() failed for '%s': %s\n",
+                autoSaveFilename, strerror(errno));
+    } else {
+        size_t element_size = 1;
+        size_t elements_to_write = sizeof(boardInputs);
+        size_t elements_written = fwrite(boardInputs, 1, elements_to_write, fp); 
+        if (elements_written != elements_to_write) {
+            result = EXIT_FAILURE;
+            fprintf(stderr, "fwrite() failed: wrote only %zu bytes out of %zu.\n", 
+                    elements_written, elements_to_write);
+        }
+        fclose(fp);
+    }
+    return result;
 }
 
 int remove(const char * filename);
@@ -548,12 +553,14 @@ int cheat=0;
       if (strlen(textbox1) == 5){
          checkRepeatedLetters();
          toUpper(textbox1);
-         autoSave();
 
          if (isWordinDictionary(fileSource,textbox1) == 1) {
+             if (currentIndex > 0 && flag == 0) currentIndex++; // если есть файл автосохранения
+             flag = 1;
              writeWord(currentIndex, textbox1);
              strcpy(boardInputs[currentIndex], textbox1);
              writeStr(wherex+16,wherey+2,"->VALID WORD!                   ", B_BLACK, F_GREEN);
+             autoSave();
              if (currentIndex<6) currentIndex++;
              if (strcmp(textbox1,secretWord) == 0){
                writeStr(wherex,wherey+1,"->SUCCESS!", B_BLACK, F_BLUE);
@@ -582,14 +589,26 @@ int cheat=0;
   }
 }
 
-void newGame(){
-int i=0;
- drawBoard();
-   if (currentIndex >0){
-     for (i=0; i<=currentIndex; i++)
-       writeWord(i, boardInputs[i]);
-   }
- gameLoop();
+int stringwordcount(char *s) {
+  int i, words = 0;
+	for (i = 0; s[i]; i++) {
+    if (s[i] == 32) words++;
+ 	}
+
+ 	if(i > 0) words++;
+	return words; 	
+}
+
+void newGame() {
+  int i;
+  currentIndex = stringwordcount(boardInputs);
+  drawBoard();
+  if (currentIndex > 0) {
+    for (i = 0; i <= currentIndex; i++)
+      writeWord(i, boardInputs[i]);
+  }
+
+  gameLoop();
 }
 
 int openFile(FILE ** fileHandler, char *fileName, char *mode) {
@@ -678,21 +697,21 @@ void* allocArray (int rows, int cols) {
   return malloc(sizeof(char[rows][cols]));
 }
 
-void readArray (int rows, int cols, char array[rows][cols]) {
-   FILE *data;
-   data = fopen("autosave.bin", "rb");
-   fread(array, sizeof(char[rows][cols]), 1, data);
+int readArray(int rows, int cols, char array[rows][cols]) {
+    FILE *fp = fopen(autoSaveFilename, "rb");
+    if (fp == NULL)
+        return -1;
+    int n = fread(array, sizeof(char[rows][cols]), 1, fp);
+    fclose(fp);
+    return n == 1 ? 0 : -1;
 }
 
 int main() {
 
-  int cols = 7;
-  int rows = 6;
-  char (*myArray)[cols] = allocArray(rows, cols);
+    char myArray[WORD_COUNT][WORD_LEN];
 
-  readArray(rows, cols, myArray);
-  strcpy(boardInputs, myArray);
-  free(myArray);
+    if (!readArray(WORD_COUNT, WORD_LEN, myArray))
+        memcpy(boardInputs, myArray, sizeof boardInputs);
 
    srand((unsigned) time(&t));
    oldx = wherex;
